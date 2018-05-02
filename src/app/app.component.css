@@ -1,0 +1,13 @@
+* {
+    font-family: Arial;
+}
+
+.right {
+    vertical-align: right;
+}
+
+.small_text {
+    color: lightslategray;
+    font-size: 10pt;
+    padding-bottom: 5px;
+}

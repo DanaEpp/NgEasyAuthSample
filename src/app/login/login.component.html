@@ -1,0 +1,24 @@
+<h2>Login</h2>
+<form #loginForm="ngForm" (ngSubmit)="loginUser(loginForm)">
+    <input type="text" name="username" id="username" placeholder="Username" required ngModel autofocus>
+    <br />
+    <input type="password" name="password" id="password" placeholder="Password" required ngModel>
+    <br /><br/>
+    <button type="submit" [disabled]="loginForm.invalid">Ok</button>
+    <br />
+    <span class="errorMessage">{{error}}</span>
+</form>
+
+<div class="form-container">
+    <a href="{{aadUrl}}">
+        <div class="signin-button">
+            <img src="./assets/aad-icon.png" /><span class="signin-button-text">Sign in with Azure AD</span>
+        </div>
+    </a>
+
+    <a href="{{msaUrl}}">
+        <div class="signin-button">
+            <img src="./assets/ms-icon.png" /><span class="signin-button-text">Sign in with Microsoft</span>
+        </div>
+    </a>
+</div>

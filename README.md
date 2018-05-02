@@ -1,27 +1,17 @@
 # NgEasyAuthSample
 
-This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 1.7.4.
+This sample project is to help the community understand how to use Azure AD's EasyAuth feature inside an SPA using Angular. It includes the right interceptors and guards to show how you can log into either an Azure AD or Microsoft (LiveID) account, and then drive your app using that IdP's identity data through their emitted access token. You could easily combine this with a dotnet core app to have an end to end solution to deploy as an App Service in Azure.
 
-## Development server
+## Background information
 
-Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
+* When debugging locally, you need to remember to set the `allowedExternalRedirectUris` to `http://127.0.0.1:4200` in the Azure Portal for the App Service under "Authentication / Authorization". Currently Microsoft's validation logic in checking if its a valid URI or not will NOT allow you to use `http://localhost:4200`.
 
-## Code scaffolding
+* You need to update the environment.ts and environment.prod.ts with the appropriate values. `baseUrl` is extremely important, or it won't work. 
 
-Run `ng generate component component-name` to generate a new component. You can also use `ng generate directive|pipe|service|class|guard|interface|enum|module`.
+## Thanks & Shout Outs
 
-## Build
+Many thanks to Auth0 for their [JWT library](https://github.com/auth0/angular2-jwt).
 
-Run `ng build` to build the project. The build artifacts will be stored in the `dist/` directory. Use the `-prod` flag for a production build.
+## Contact
 
-## Running unit tests
-
-Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.io).
-
-## Running end-to-end tests
-
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
-
-## Further help
-
-To get more help on the Angular CLI use `ng help` or go check out the [Angular CLI README](https://github.com/angular/angular-cli/blob/master/README.md).
+Please feel free to expand on this. Pull requests welcome. Alternatively, you can reach out to me on Twitter at [@danaepp](https://twitter.com/danaepp) or by email at [dana@vulscan.com](mailto:dana@vulscan.com).
