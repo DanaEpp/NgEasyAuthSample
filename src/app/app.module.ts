@@ -13,8 +13,8 @@ import { LoginService } from './core/login.service';
 import { JwtModule } from '@auth0/angular-jwt';
 import { AuthInterceptor } from './core/auth-interceptor.service';
 import { ErrorComponent } from './error/error.component';
-import { PostauthComponent } from './login/postauth.component';
 import { SharedModule } from './shared/shared.module';
+import { LogoutComponent } from './logout/logout.component';
 
 export function tokenGetter() {
   return localStorage.getItem('access_token');
@@ -25,8 +25,8 @@ export function tokenGetter() {
     AppComponent,
     HomeComponent,
     LoginComponent,
-    ErrorComponent,
-    PostauthComponent
+    LogoutComponent,
+    ErrorComponent
   ],
   imports: [
     BrowserModule,

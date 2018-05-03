@@ -8,9 +8,11 @@ This sample project is to help the community understand how to use Azure AD's Ea
 
 * You need to update the environment.ts and environment.prod.ts with the appropriate values. `baseUrl` is extremely important, or it won't work. 
 
+* In the Azure Portal for the App Service under "Authentication / Authorization" you will want to enable `Allow Anonymous requests (no action)` in the setting `Action to take when request is not authenticated`.
+
 ## Thanks & Shout Outs
 
-Many thanks to Auth0 for their [JWT library](https://github.com/auth0/angular2-jwt).
+* Many thanks to [Chris Gillum](https://twitter.com/cgillum) for pointing me to his [client side SPA sample](https://github.com/cgillum/easyauth/blob/master/samples/graphbindings/client/index.html) that uses the Azure Mobile JS library.
 
 ## Contact
 
