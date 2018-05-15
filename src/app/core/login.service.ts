@@ -17,8 +17,56 @@ export class LoginService {
     private userIdentity: IdentityTokenInfo = null;
     private loggedIn: boolean = false;
 
+    private storageTokenKey: string = 'identity_token_info';
+
     constructor( private httpClient: HttpClient, private logger: LoggerService, private router: Router ) {
         this.azureServiceClient = new WindowsAzure.MobileServiceClient(this.baseUrl);
+        
+        // Load userIdentity from local storage if it exists
+        this.userIdentity = this.userTokenInfo;
+    }
+
+    public get userTokenInfo() 
+    {
+      let token: IdentityTokenInfo = null;
+
+      if( this.userIdentity ) 
+      {
+        if( this.isTokenExpired(this.userIdentity.expires_on))
+        {
+          this.logout();             
+          return null;
+        }
+
+        // If its a valid token, just return it and move on.
+        token = this.userIdentity;
+      }
+      else 
+      {
+        // Does this user's token reside in local storage?
+        try
+        {
+          token = JSON.parse(localStorage.getItem(this.storageTokenKey));
+          
+          if( token )
+          {
+            if( this.isTokenExpired(token.expires_on))
+            {
+              this.logout();             
+              token = null;
+            }
+          }
+
+        }
+        catch(e)
+        {
+          this.logger.debug(e);
+          this.logout();             
+          token = null;
+        }
+      }
+
+      return token;
     }
 
     public isLoggedIn(): boolean {
@@ -27,9 +75,11 @@ export class LoginService {
 
       let loggedIn: boolean = false;
 
-      if( this.userIdentity ) 
+      let userInfo: IdentityTokenInfo = this.userTokenInfo;
+            
+      if( userInfo ) 
       {
-        if( this.userIdentity.user_id && this.userIdentity.access_token && this.userIdentity.expires_on ) 
+        if( userInfo.user_id && userInfo.access_token && this.userIdentity.expires_on ) 
         {
           if( this.isTokenExpired(this.userIdentity.expires_on) )
           {
@@ -59,10 +109,25 @@ export class LoginService {
           // Alternative claims to consider:   
           // http://schemas.xmlsoap.org/ws/2005/05/identity/claims/upn
           // http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress
-          let name: string = this.userIdentity.user_claims.filter( claim => claim.typ === "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name" )[0].val; //DevSkim: ignore DS137138 
+          //let name: string = this.userIdentity.user_claims.filter( claim => claim.typ === "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name" )[0].val; //DevSkim: ignore DS137138 
+          
+          let name: string = this.userIdentity.user_id;
+          
           if( name )
+          {
             username = name;
+          }
+
+
         }
+        else
+        {
+          this.logger.debug("No claims found");
+        }
+      }
+      else
+      {
+        this.logger.debug( "No identity found.");
       }
 
       return username;
@@ -85,6 +150,9 @@ export class LoginService {
                     data => {
                       this.userIdentity = data[0];
                       this.loggedIn = true;
+
+                      // Write out userIdentity to local storage
+                      localStorage.setItem( this.storageTokenKey, JSON.stringify(this.userIdentity));
                       
                       this.router.navigateByUrl( "/home" );
                     },
@@ -101,29 +169,34 @@ export class LoginService {
                         }
                       }
 
-                      this.loggedIn = false; 
-                      this.userIdentity = null;
+                      this.clearAuth();
                     }
                 );
             }, 
             err => {
                 reject("Login failed");
-                console.log('Error: ' + err);
+                this.logger.error('Error: ' + err);
+                localStorage.removeItem(this.storageTokenKey);
             });
             break;
           default:
-            console.log('Error: not implemented login request: ' + loginType);
+            this.logger.error('Error: not implemented login request: ' + loginType);
             reject("Unknown login method");
             break;
         }
       });
     }
 
+    private clearAuth(): void {
+      this.loggedIn = false; 
+      this.userIdentity = null;
+      localStorage.removeItem(this.storageTokenKey);
+    }
+
     public logout(): Observable<any> {
       this.logger.trace("--> LoginService.logout()");
 
-      this.loggedIn = false; 
-      this.userIdentity = null;
+      this.clearAuth();
 
       this.azureServiceClient.logout();
 

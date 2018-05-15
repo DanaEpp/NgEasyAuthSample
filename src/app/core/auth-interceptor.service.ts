@@ -1,27 +1,46 @@
 import { Injectable } from '@angular/core';
-import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest } from '@angular/common/http';
+import { HttpEvent, HttpInterceptor, HttpHandler, HttpRequest, HttpResponse, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/do';
+import { IdentityTokenInfo } from '../shared/shared.module';
+import { LoggerService } from './logger.service';
+import { Router } from '@angular/router';
+import { LoginService } from './login.service';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-    private storageTokenKey: string = 'access_token';
+    private storageTokenKey: string = 'identity_token_info';
 
-    // Can't inject the login service here, cyclic issue
-    constructor() { }
+    constructor(private logger: LoggerService, private router: Router, private loginService: LoginService) { }
 
     intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> { 
-        const authToken = localStorage.getItem(this.storageTokenKey);      
+        let authToken: IdentityTokenInfo = null;
 
-        if (authToken) {
+        authToken = this.loginService.userTokenInfo;
 
-            const headers = req.headers.set('Authorization', 'Bearer ' + authToken);
+        if (authToken) 
+        {
+            const customReq = req.clone({ 
+                headers: req.headers.set('Authorization', 'Bearer ' + authToken.access_token)
+            });
 
-            const cloned = req.clone({ headers });
-
-            return next.handle(cloned);
+            return next
+                .handle(customReq)
+                .do((event: HttpEvent<any>) => {
+                    if( event instanceof HttpResponse) {
+                        // In case you wanna do something with the response
+                    }
+                },
+                (err: any) => {
+                    if( err.status === 401 ) {
+                        // Invalid token... redirect back to login
+                        this.router.navigateByUrl("/login");
+                    }
+                });
         }
-        else {
+        else 
+        {
             return next.handle(req);
         }
     }
